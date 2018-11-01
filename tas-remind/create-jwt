@@ -1,0 +1,31 @@
+#!/bin/bash
+secret=$1
+
+header="{
+	\"alg\": \"HS256\",
+  \"typ\": \"JWT\"
+}"
+
+iat=$(date +%s)
+payload="{
+  \"iat\": ${iat},
+  \"userEmail\": \"remind@bctc-tas.com\",
+  \"userRole\": \"ADMIN\"
+}"
+
+function base64url {
+	echo -n "$1" | openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
+}
+
+function hmac_sha256 {
+	echo -n "$1" | openssl dgst -binary -sha256 -hmac $2
+}
+
+header_base64=$(base64url "${header}")
+payload_base64=$(base64url "${payload}")
+
+data="${header_base64}.${payload_base64}"
+hashed_data=$(hmac_sha256 "${data}" $secret)
+signature=$(base64url "${hashed_data}")
+
+echo "${data}.${signature}"

@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  server:
+    build: ./tas-server
+    environment:
+      - PORT=${SERVER_PORT}
+      - DB_CONNECTION_STRING=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db/${MYSQL_DATABASE}
+      - SECRET_KEY=${SECRET_KEY}
+      - WEB_APP_URL=${WEB_APP_URL}
+      - MG_FROM_EMAIL=${MG_FROM_EMAIL}
+      - MG_API_KEY=${MG_API_KEY}
+      - MG_DOMAIN=${MG_DOMAIN}
+      - PLIVO_AUTH_ID=${PLIVO_AUTH_ID}
+      - PLIVO_AUTH_TOKEN=${PLIVO_AUTH_TOKEN}
+      - PLIVO_SRC_NUM=${PLIVO_SRC_NUM}
+    restart: always
+    ports:
+      - 4000:${SERVER_PORT}
+    depends_on:
+      - db
+  db:
+    build: ./tas-db
+    restart: always
+    env_file: .env
+    ports:
+      - 5432:5432
+  remind:
+    build:
+      context: ./tas-remind
+      args:
+        port: ${SERVER_PORT}
+        secret: ${SECRET_KEY}
+        hour: ${REMIND_HOUR_UTC}
+    restart: always
+    depends_on:
+      - server
