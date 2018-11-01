@@ -66,7 +66,7 @@ exit
 
 `tas-server` connects to `tas-db` and is queried by [`tas-app`](https://github.com/j-d-b/tas-app/) (the web UI) and `tas-remind` using the GraphQL API.
 
-`tas-server` related environment variables are:
+`tas-server` uses the following environment variables:
 ```shell
 SERVER_PORT
 PRIMARY_SECRET
