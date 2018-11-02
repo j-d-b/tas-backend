@@ -43,9 +43,7 @@ The TAS backend is composed of:
 * A MariaDB database
 
 ### tas-server
-[`tas-server`](https://github.com/j-d-b/tas-server/) is an express web server which exposes a GraphQL API.
-
-`tas-server` has it's own repository and is included as a submodule here.
+[`tas-server`](https://hub.docker.com/r/jbrdy/tas-server/) is an express web server which exposes a GraphQL API.
 
 `tas-server` connects to the database and is queried by [`tas-app`](https://github.com/j-d-b/tas-app/) (the web UI) and `tas-remind` using throught the GraphQL API.
 

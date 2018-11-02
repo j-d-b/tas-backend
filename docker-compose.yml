@@ -2,7 +2,7 @@ version: '3'
 
 services:
   api:
-    build: ./tas-server
+    image: jbrdy/tas-server
     environment:
       - PORT=${SERVER_PORT}
       - DB_CONNECTION_STRING=mysql://${DB_USER}:${DB_PASSWORD}@db/${DB_NAME}
