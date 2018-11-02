@@ -1,11 +1,11 @@
 version: '3'
 
 services:
-  server:
+  api:
     build: ./tas-server
     environment:
       - PORT=${SERVER_PORT}
-      - DB_CONNECTION_STRING=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db/${MYSQL_DATABASE}
+      - DB_CONNECTION_STRING=mysql://${DB_USER}:${DB_PASSWORD}@db/${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
       - WEB_APP_URL=${WEB_APP_URL}
       - MG_FROM_EMAIL=${MG_FROM_EMAIL}
@@ -21,12 +21,7 @@ services:
       - tas-server-logs:/tas-server/logs
     depends_on:
       - db
-  db:
-    build: ./tas-db
-    restart: always
-    env_file: .env
-    ports:
-      - 3306:3306
+
   remind:
     build:
       context: ./tas-remind
@@ -36,4 +31,35 @@ services:
         hour: ${REMIND_HOUR_UTC}
     restart: always
     depends_on:
-      - server
+      - api
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    ports:
+      - 3306:3306
+
+  backup:
+    image: deitch/mysql-backup
+    restart: always
+    user: "0" # fixing backup permissions issue
+    environment:
+      - DB_DUMP_TARGET=/db-backup
+      - DB_SERVER=db
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASSWORD}
+      - DB_NAMES=${DB_NAME}
+      - DB_DUMP_BEGIN=2300
+    volumes:
+      - db-backup:/db-backup
+    depends_on:
+      - db
+
+volumes:
+  tas-server-logs:
+  db-backup:
