@@ -3,24 +3,28 @@ The docker-compose deployed API backend service for the [BCTC](http://www.bctc-l
 
 ## Usage
 The `tas-backend` is run with `docker-compose`, which starts four services:
+
 * **api** - web-server exposing a GraphQL API
 * **db** - MariaDB database
 * **remind** - spawning appointment notifications at a scheduled time
 * **backup** - scheduled database dumps
 
 ### Development (default)
+
 ```
 docker-compose up
 ```
 
 ### Production (TODO)
 **Note:** This section requires further work
+
 ```
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 ## Required Environment Variables
 A `.env` file including all of the following fields is required:
+
 * `DB_ROOT_PASSWORD`: database root user password
 * `DB_USER`: username for the database
 * `DB_PASSWORD`: password for the TAS database user (`DB_USER`)
@@ -35,9 +39,15 @@ A `.env` file including all of the following fields is required:
 * `PLIVO_AUTH_ID`: Plivo auth ID (SMS sending)
 * `PLIVO_AUTH_TOKEN`: Plivo auth (SMS sending)
 * `PLIVO_SRC_NUM`: Plivo sender mobile number (SMS sending)
+* `DB_SETUP_DEFAULT_ALLOWED_APPTS_PER_HOUR`: Initial `config` table value for `defaultAllowedApptsPerHour`
+* `DB_SETUP_MAX_TFU_PER_APPT`: Initial `config` table value for `maxTFUPerAppt`
+* `DB_SETUP_ARRIVAL_WINDOW_LENGTH`: Initial `config` table value for `arrivalWindowLength` *must be `5`, `10`, `15`, `30`, or `60`*
+* `DB_SETUP_APPTS_QUERY_MAX_COUNT`: Initial `config` table value for `apptsQueryMaxCount`
+* `ROOT_USER_PW`: Password for the initial root user
 
 ## Components
 The TAS backend is composed of:
+
 * [`tas-server`](https://github.com/j-d-b/tas-server/): A web server exposing a GraphQL API
 * `tas-remind`: A cron which runs once a day and spawns notification sending by querying the API with the `sendApptReminders` mutation
 * A MariaDB database
@@ -48,6 +58,7 @@ The TAS backend is composed of:
 `tas-server` connects to the database and is queried by [`tas-app`](https://github.com/j-d-b/tas-app/) (the web UI) and `tas-remind` using throught the GraphQL API.
 
 `tas-server` uses the following environment variables:
+
 ```
 SERVER_PORT
 SECRET_KEY
@@ -61,6 +72,11 @@ MG_DOMAIN
 PLIVO_AUTH_ID
 PLIVO_AUTH_TOKEN
 PLIVO_SRC_NUM
+DB_SETUP_DEFAULT_ALLOWED_APPTS_PER_HOUR
+DB_SETUP_MAX_TFU_PER_APPT
+DB_SETUP_ARRIVAL_WINDOW_LENGTH
+DB_SETUP_APPTS_QUERY_MAX_COUNT
+ROOT_USER_PW
 ```
 
 `tas-server` persists logs to the `tas-server-logs` Docker area volume.
@@ -75,15 +91,18 @@ For more details, see the `tas-server` [README](https://github.com/j-d-b/tas-ser
 `tas-remind` generates its own signed JWT with no expiration for the user `remind@bctc-tas.com` using the `create-jwt` bash script.
 
 `tas-remind` uses the following environment variables from `.env`:
+
 ```
 SECRET_KEY
 SERVER_PORT
 REMIND_HOUR_UTC
 ```
+
 to generate the JWT, connect to the `tas-server`, and schedule send requests respectively.
 
 ### Database
 The database is initialized with the following details set in `.env`:
+
 ```
 DB_ROOT_PASSWORD
 DB_USER
@@ -97,6 +116,7 @@ The database **exposes port 5432** for use by DB management tools and other conn
 To set up the database, `docker exec` into the container running `tas-server` and run either `yarn setup` or `yarn setup:dev`.
 
 **Example:**
+
 ```
 docker exec -it tas-backend_api_1 bash
 yarn setup
@@ -114,8 +134,9 @@ All containers logs are persisted
 ## License
 The TAS was built for [BCTC](http://www.bctc-lb.com/) and is licensed under the [GNU General Public License, Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
-See `LICENSE.md`(https://github.com/j-d-b/tas-backend/blob/master/LICENSE.md) for details.
+See [`LICENSE.md`](https://github.com/j-d-b/tas-backend/blob/master/LICENSE.md) for details.
 
 ## Todo
+
 * Switch to MSSQL per client request
 * Elegant logging
